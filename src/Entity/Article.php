@@ -27,12 +27,12 @@ class Article
     #[ORM\Column]
     private ?int $QteStock = null;
 
-    #[ORM\ManyToMany(targetEntity: Devis::class, mappedBy: 'Article')]
-    private Collection $devis;
+
+    #[ORM\ManyToOne(inversedBy: 'Article')]
+    private ?LigneDevis $ligneDevis = null;
 
     public function __construct()
     {
-        $this->devis = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -88,29 +88,16 @@ class Article
         return $this;
     }
 
-    /**
-     * @return Collection<int, Devis>
-     */
-    public function getDevis(): Collection
+    
+
+    public function getLigneDevis(): ?LigneDevis
     {
-        return $this->devis;
+        return $this->ligneDevis;
     }
 
-    public function addDevi(Devis $devi): self
+    public function setLigneDevis(?LigneDevis $ligneDevis): self
     {
-        if (!$this->devis->contains($devi)) {
-            $this->devis->add($devi);
-            $devi->addArticle($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDevi(Devis $devi): self
-    {
-        if ($this->devis->removeElement($devi)) {
-            $devi->removeArticle($this);
-        }
+        $this->ligneDevis = $ligneDevis;
 
         return $this;
     }

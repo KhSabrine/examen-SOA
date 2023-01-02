@@ -33,13 +33,14 @@ class ArticleController extends AbstractController
   
         foreach ($articles as $article) {
            $data[] = [
-               'numarticle' => $article->getNumarticle(),
+            'numarticle' => $article->getNumarticle(),
+            'libelle' => $article->getLibelle(),
+            'prixunitaire' => $article->getPrixUnitaire(),
+            'qtestock' => $article->getQteStock(),
            ];
         }
         return $this->json($data);
     }
- 
-  
     
     /**
      * @Rest\Post(
@@ -91,7 +92,13 @@ class ArticleController extends AbstractController
     }
   
     /**
-     * @Route("/article/{id}", name="article_edit", methods={"PUT"})
+     * @Rest\Put(
+     *    path = "/article/{id}",
+     *    name = "article_edit"
+     * )
+     * @QueryParam(name="libelle" , description="libelle", nullable=false, allowBlank=false)
+     * @QueryParam(name="prixunitaire" , description="Prix Unitaire", nullable=false, allowBlank=false)
+     * @QueryParam(name="qtestock" , description="Quantité en stock", nullable=false, allowBlank=false)
      */
     public function edit(ManagerRegistry $doctrine,ArticleRepository $articleRepository,Request $req,int $id): Response
     {
@@ -102,8 +109,7 @@ class ArticleController extends AbstractController
             return $this->json('No article found for id ' . $id, 404);
         }
 
-        $article->setLibelle("testtest");
-        dump($req->query->get('qtestock'));
+        $article->setLibelle($req->get('libelle'));
         $article->setPrixUnitaire($req->get('prixunitaire'));
         $article->setQteStock($req->get('qtestock'));
         $entityManager->flush();

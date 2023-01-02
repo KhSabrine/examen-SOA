@@ -22,12 +22,16 @@ class Devis
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $DateDevis = null;
 
-    #[ORM\ManyToMany(targetEntity: Article::class, inversedBy: 'devis')]
-    private Collection $Article;
+
+    #[ORM\OneToMany(mappedBy: 'Devis', targetEntity: LigneDevis::class)]
+    private Collection $ligneDevis;
+
+    #[ORM\ManyToOne(inversedBy: 'Devis')]
+    private ?Client $client = null;
 
     public function __construct()
     {
-        $this->Article = new ArrayCollection();
+        $this->ligneDevis = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -59,26 +63,45 @@ class Devis
         return $this;
     }
 
+
     /**
-     * @return Collection<int, Article>
+     * @return Collection<int, LigneDevis>
      */
-    public function getArticle(): Collection
+    public function getLigneDevis(): Collection
     {
-        return $this->Article;
+        return $this->ligneDevis;
     }
 
-    public function addArticle(Article $article): self
+    public function addLigneDevi(LigneDevis $ligneDevi): self
     {
-        if (!$this->Article->contains($article)) {
-            $this->Article->add($article);
+        if (!$this->ligneDevis->contains($ligneDevi)) {
+            $this->ligneDevis->add($ligneDevi);
+            $ligneDevi->setDevis($this);
         }
 
         return $this;
     }
 
-    public function removeArticle(Article $article): self
+    public function removeLigneDevi(LigneDevis $ligneDevi): self
     {
-        $this->Article->removeElement($article);
+        if ($this->ligneDevis->removeElement($ligneDevi)) {
+            // set the owning side to null (unless already changed)
+            if ($ligneDevi->getDevis() === $this) {
+                $ligneDevi->setDevis(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): self
+    {
+        $this->client = $client;
 
         return $this;
     }
