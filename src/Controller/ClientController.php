@@ -19,13 +19,16 @@ use FOS\RestBundle\Controller\Annotations\QueryParam;
  */
 class ClientController extends AbstractController
 {
+    public function __construct(private ManagerRegistry $doctrine)
+    {}
+
     /**
      * @Rest\Get("/clients", name="app_clients_list")
      * @Rest\QueryParam(name="order")
      */
-    public function index(ManagerRegistry $doctrine): Response
+    public function index(): Response
     {
-        $clients = $doctrine
+        $clients = $this->doctrine
         ->getRepository(Client::class)
             ->findAll();
   
@@ -54,9 +57,9 @@ class ClientController extends AbstractController
      * @QueryParam(name="adresse" , description="Quantité en stock", nullable=false, allowBlank=false)
      * @QueryParam(name="tel" , description="Quantité en stock", nullable=false, allowBlank=false)
      */
-    public function new(ManagerRegistry $doctrine,ClientRepository $clientRepository, Request $request): Response
+    public function new(ClientRepository $clientRepository, Request $request): Response
     {
-        $entityManager = $doctrine->getManager();
+        $entityManager = $this->doctrine->getManager();
 
         $client = new Client();
         $client->setCin($request->get('cin'));
@@ -76,7 +79,7 @@ class ClientController extends AbstractController
     /**
      * @Rest\Get("/client/{id}", name="app_client_list")
      */
-    public function show(ManagerRegistry $doctrine,clientRepository $clientRepository, int $id): Response
+    public function show(clientRepository $clientRepository, int $id): Response
     {
         $client = $clientRepository->findOneByNumclient($id);
         if (!$client) {
@@ -103,9 +106,9 @@ class ClientController extends AbstractController
      * @QueryParam(name="prenom" , description="Prix Unitaire", nullable=false, allowBlank=false)
      * @QueryParam(name="adresse" , description="Quantité en stock", nullable=false, allowBlank=false)
      */
-    public function edit(ManagerRegistry $doctrine,clientRepository $clientRepository,Request $req,int $id): Response
+    public function edit(clientRepository $clientRepository,Request $req,int $id): Response
     {
-        $entityManager = $doctrine->getManager();
+        $entityManager = $this->doctrine->getManager();
         $client = $clientRepository->findOneByNumclient($id);
 
         if (!$client) {
@@ -130,9 +133,9 @@ class ClientController extends AbstractController
     /**
      * @Route("/client/{id}", name="client_delete", methods={"DELETE"})
      */
-    public function delete(ManagerRegistry $doctrine, int $id): Response
+    public function delete(int $id): Response
     {
-        $entityManager = $doctrine->getManager();
+        $entityManager = $this->doctrine->getManager();
         $client = $entityManager->getRepository(client::class)->find($id);
   
         if (!$client) {
@@ -144,4 +147,5 @@ class ClientController extends AbstractController
   
         return $this->json('Deleted a client successfully with id ' . $id);
     }
+
 }

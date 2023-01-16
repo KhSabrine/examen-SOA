@@ -19,13 +19,17 @@ use FOS\RestBundle\Controller\Annotations\QueryParam;
  */
 class ArticleController extends AbstractController
 {
+
+    public function __construct(private ManagerRegistry $doctrine)
+    {}
+
     /**
      * @Rest\Get("/articles", name="app_articles_list")
      * @Rest\QueryParam(name="order")
      */
-    public function index(ManagerRegistry $doctrine): Response
+    public function index(): Response
     {
-        $articles = $doctrine
+        $articles = $this->doctrine
         ->getRepository(Article::class)
             ->findAll();
   
@@ -52,9 +56,9 @@ class ArticleController extends AbstractController
      * @QueryParam(name="prixunitaire" , description="Prix Unitaire", nullable=false, allowBlank=false)
      * @QueryParam(name="qtestock" , description="Quantité en stock", nullable=false, allowBlank=false)
      */
-    public function new(ManagerRegistry $doctrine,ArticleRepository $articleRepository, Request $request): Response
+    public function new(ArticleRepository $articleRepository, Request $request): Response
     {
-        $entityManager = $doctrine->getManager();
+        $entityManager = $this->doctrine->getManager();
 
         $article = new Article();
         $article->setNumArticle($request->get('numarticle'));
@@ -73,7 +77,7 @@ class ArticleController extends AbstractController
     /**
      * @Rest\Get("/article/{id}", name="app_article_list")
      */
-    public function show(ManagerRegistry $doctrine,ArticleRepository $articleRepository, int $id): Response
+    public function show(ArticleRepository $articleRepository, int $id): Response
     {
         $article = $articleRepository->findOneByNumarticle($id);
         if (!$article) {
@@ -100,9 +104,9 @@ class ArticleController extends AbstractController
      * @QueryParam(name="prixunitaire" , description="Prix Unitaire", nullable=false, allowBlank=false)
      * @QueryParam(name="qtestock" , description="Quantité en stock", nullable=false, allowBlank=false)
      */
-    public function edit(ManagerRegistry $doctrine,ArticleRepository $articleRepository,Request $req,int $id): Response
+    public function edit(ArticleRepository $articleRepository,Request $req,int $id): Response
     {
-        $entityManager = $doctrine->getManager();
+        $entityManager = $this->doctrine->getManager();
         $article = $articleRepository->findOneByNumarticle($id);
 
         if (!$article) {
@@ -127,9 +131,9 @@ class ArticleController extends AbstractController
     /**
      * @Route("/article/{id}", name="article_delete", methods={"DELETE"})
      */
-    public function delete(ManagerRegistry $doctrine, int $id): Response
+    public function delete(int $id): Response
     {
-        $entityManager = $doctrine->getManager();
+        $entityManager=$this->doctrine->getManager();
         $article = $entityManager->getRepository(article::class)->find($id);
   
         if (!$article) {

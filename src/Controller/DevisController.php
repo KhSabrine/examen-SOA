@@ -22,29 +22,33 @@ use FOS\RestBundle\Controller\Annotations\QueryParam;
  */
 class DevisController extends AbstractController
 {
+    public function __construct(private ManagerRegistry $doctrine)
+    {}
+
     /**
      * @Route("/devis", name="devis_index", methods={"GET"})
      */
-    public function index(ManagerRegistry $doctrine): Response
+    public function index(): Response
     {
-        $devis = $doctrine
+        $devis = $this->doctrine
             ->getRepository(Devis::class)
             ->findAll();
-
         $data = [];
-
+        $articles = [];
         foreach ($devis as $d) {
             $obj = [
                 'numdevis' => $d->getNumDevis(),
-                'datedevis' => $d->getDateDevis()
+                'datedevis' => $d->getDateDevis(),
+                'CIN_Client'=>$d->getClient()->getCin()
             ];
-            foreach ($d->getLigneDevis() as $key => $value) {
+            foreach ($d->getLigneDevis() as $value) {
                 $obj2 = [
-                    'numarticle ' . $key + 1 => $value->getArticle()->getNumArticle(),
-                    'quantite ' . $key + 1 => $value->getQte()
+                        'numarticle ' => $value->getArticle()->getNumArticle(),
+                        'quantite ' => $value->getQte()
                 ];
-                $obj = array_merge($obj, $obj2);
+                array_push($articles, $obj2);
             }
+            array_push($obj, array('articles' => $articles));
             array_push($data, $obj);
         }
         return $this->json($data);
@@ -61,20 +65,17 @@ class DevisController extends AbstractController
      * @QueryParam(name="qtestock" , description="Quantité en stock", nullable=false, allowBlank=false)
      * @QueryParam(name="client" , description="Quantité en stock", nullable=false, allowBlank=false)
      */
-    public function new (ManagerRegistry $doctrine, ArticleRepository $articleRepository,ClientRepository $clientRepository, Request $request): Response
+    public function new(ArticleRepository $articleRepo, ClientRepository $clientRepo, Request $request): Response
     {
         $header = $request->headers->get('client_cin');
-        $entityManager = $doctrine->getManager();
-        $allDevis = $doctrine->getRepository(Devis::class)->findAll();
+        $entityManager = $this->doctrine->getManager();
+        $allDevis = $this->doctrine->getRepository(Devis::class)->findAll();
         $devis = new Devis();
-        if ($allDevis)
-            $devis->setNumDevis(end($allDevis)->getNumDevis() + 1);
-        else
-            $devis->setNumDevis(1);
+        if ($allDevis) {$devis->setNumDevis(end($allDevis)->getNumDevis() + 1);}else {$devis->setNumDevis(1);}
         $devis->setDateDevis(new \DateTime());
-        $devis->setClient($clientRepository->findOneByCin($header));
+        $devis->setClient($clientRepo->findOneByCin($header));
         foreach (json_decode($request->getContent()) as $key => $value) {
-            $articles = $articleRepository->findOneByNumarticle($value->numarticle);
+            $articles = $articleRepo->findOneByNumarticle($value->numarticle);
             $ligneDevis = new LigneDevis();
             $ligneDevis->setDevis($devis);
             $ligneDevis->setArticle($articles);
@@ -91,7 +92,7 @@ class DevisController extends AbstractController
     /**
      * @Route("/devis/{id}", name="devis_show", methods={"GET"})
      */
-    public function show(ManagerRegistry $doctrine, DevisRepository $devisRepository, int $id): Response
+    public function show(DevisRepository $devisRepository, int $id): Response
     {
         $devis = $devisRepository->findOneByNumDevis($id);
 
@@ -111,9 +112,9 @@ class DevisController extends AbstractController
     /**
      * @Route("/devis/{id}", name="devis_edit", methods={"PUT"})
      */
-    public function edit(ManagerRegistry $doctrine, Request $request, int $id): Response
+    public function edit(Request $request, int $id): Response
     {
-        $entityManager = $doctrine->getManager();
+        $entityManager = $this->doctrine->getManager();
         $devis = $entityManager->getRepository(devis::class)->find($id);
 
         if (!$devis) {
@@ -136,9 +137,9 @@ class DevisController extends AbstractController
     /**
      * @Route("/devis/{id}", name="devis_delete", methods={"DELETE"})
      */
-    public function delete(ManagerRegistry $doctrine, int $id): Response
+    public function delete(int $id): Response
     {
-        $entityManager = $doctrine->getManager();
+        $entityManager = $this->doctrine->getManager();
         $devis = $entityManager->getRepository(devis::class)->find($id);
 
         if (!$devis) {
