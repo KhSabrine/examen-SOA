@@ -67,6 +67,8 @@ class ClientController extends AbstractController
         $client->setPrenom($request->get('prenom'));
         $client->setAdresse($request->get('adresse'));
         $client->setTel($request->get('tel'));
+        $client->setEmail($request->get('email'));
+        $client->setRole($request->get('role'));
         $existe = $clientRepository->findOneByCin($client->getCin());
         if ($existe) {
             return $this->json('client existe deja');
@@ -77,20 +79,22 @@ class ClientController extends AbstractController
     }
   
     /**
-     * @Rest\Get("/client/{id}", name="app_client_list")
+     * @Rest\Get("/client/{email}", name="app_client_list")
      */
-    public function show(clientRepository $clientRepository, int $id): Response
+    public function show(clientRepository $clientRepository, string $email): Response
     {
-        $client = $clientRepository->findOneByNumclient($id);
+        $client = $clientRepository->findOneBy(array('email'=>$email));
         if (!$client) {
   
-            return $this->json('No client found for id ' . $id, 404);
+            return $this->json('No client found for id ' . $email, 404);
         }
   
         $data =  [
-            'numclient' => $client->getNumclient(),
+            'numclient' => $client->getCin(),
+            'email'=>$client->getEmail(),
             'nom' => $client->getnom(),
             'prenom' => $client->getprenom(),
+            'role'=>$client->getRole(),
             'adresse' => $client->getadresse(),
         ];
           

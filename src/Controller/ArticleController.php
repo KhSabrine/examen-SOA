@@ -40,6 +40,7 @@ class ArticleController extends AbstractController
             'numarticle' => $article->getNumarticle(),
             'libelle' => $article->getLibelle(),
             'prixunitaire' => $article->getPrixUnitaire(),
+            'image'=>$article->getImage(),
             'qtestock' => $article->getQteStock(),
            ];
         }
@@ -65,6 +66,7 @@ class ArticleController extends AbstractController
         $article->setLibelle($request->get('libelle'));
         $article->setPrixUnitaire($request->get('prixunitaire'));
         $article->setQteStock($request->get('qtestock'));
+        $article->setImage($request->get('image'));
         $existe = $articleRepository->findOneByNumarticle($article->getNumArticle());
         if ($existe) {
             return $this->json('Article existe deja');

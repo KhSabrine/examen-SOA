@@ -33,6 +33,12 @@ class Client
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Devis::class)]
     private Collection $Devis;
 
+    #[ORM\Column(length: 255)]
+    private ?string $email = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $role = null;
+
     public function __construct()
     {
         $this->Devis = new ArrayCollection();
@@ -129,6 +135,30 @@ class Client
                 $devi->setClient(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getRole(): ?string
+    {
+        return $this->role;
+    }
+
+    public function setRole(string $role): self
+    {
+        $this->role = $role;
 
         return $this;
     }

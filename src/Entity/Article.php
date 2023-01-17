@@ -31,6 +31,9 @@ class Article
     #[ORM\ManyToOne(inversedBy: 'Article')]
     private ?LigneDevis $ligneDevis = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $image = null;
+
     public function __construct()
     {
     }
@@ -98,6 +101,18 @@ class Article
     public function setLigneDevis(?LigneDevis $ligneDevis): self
     {
         $this->ligneDevis = $ligneDevis;
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(string $image): self
+    {
+        $this->image = $image;
 
         return $this;
     }
