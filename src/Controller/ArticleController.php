@@ -6,7 +6,6 @@ use App\Entity\Article;
 use App\Repository\ArticleRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,7 +24,6 @@ class ArticleController extends AbstractController
 
     /**
      * @Rest\Get("/articles", name="app_articles_list")
-     * @Rest\QueryParam(name="order")
      */
     public function index(): Response
     {
@@ -83,18 +81,14 @@ class ArticleController extends AbstractController
     {
         $article = $articleRepository->findOneByNumarticle($id);
         if (!$article) {
-  
             return $this->json('No article found for id ' . $id, 404);
-        }
-  
-        $data =  [
+        } 
+        return $this->json([
             'numarticle' => $article->getNumArticle(),
             'libelle' => $article->getLibelle(),
             'prixunitaire' => $article->getPrixUnitaire(),
             'qtestock' => $article->getQteStock(),
-        ];
-          
-        return $this->json($data);
+        ]);
     }
   
     /**
